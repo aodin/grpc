@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package things;
+
+message Thing {
+  uint64 id      = 1;
+  string name    = 2;
+  bytes  content = 3;
+}
+
+message GetThingRequest {
+  uint64 id = 1;
+}
+
+message QueryThingsRequest {
+  string search = 1;
+  string order  = 2;
+  uint64 limit  = 3;
+  uint64 offset = 4;
+}
+
+service Things {
+  rpc Create(Thing) returns (Thing) {}
+  rpc Get(GetThingRequest) returns (Thing) {}
+  rpc Query(QueryThingsRequest) returns (stream Thing) {}
+}
