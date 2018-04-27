@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/metadata"
 
-	things "github.com/aodin/grpcweb/go"
+	things "github.com/aodin/grpc/go"
 )
 
 var (

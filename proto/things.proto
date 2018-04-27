@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package things;
 
+import "google/api/annotations.proto";
+
 message Thing {
   uint64 id      = 1;
   string name    = 2;
@@ -20,7 +22,22 @@ message QueryThingsRequest {
 }
 
 service Things {
-  rpc Create(Thing) returns (Thing) {}
-  rpc Get(GetThingRequest) returns (Thing) {}
-  rpc Query(QueryThingsRequest) returns (stream Thing) {}
+  rpc Create(Thing) returns (Thing) {
+    option (google.api.http) = {
+      post: "/v1/things";
+      body: "*";
+    };
+  }
+
+  rpc Get(GetThingRequest) returns (Thing) {
+    option (google.api.http) = {
+      get: "/v1/things/{id}";
+    };
+  }
+
+  rpc Query(QueryThingsRequest) returns (stream Thing) {
+    option (google.api.http) = {
+      get: "/v1/things";
+    };
+  }
 }

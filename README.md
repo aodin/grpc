@@ -1,9 +1,19 @@
-gRPC Web Example
+gRPC Web and Gateway
 ====
 
+## Protocol Buffers
 
-[Example Go server](https://github.com/improbable-eng/grpc-web/blob/master/example/go/exampleserver/exampleserver.go)
+Install the [protobuf compiler](https://github.com/google/protobuf)
 
+Additional go packages Gateway, swagger, and protowrap:
+
+
+```sh
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+go get -u github.com/golang/protobuf/...
+go get -u github.com/square/goprotowrap/cmd/protowrap
+```
 
 #### Go compilation
 
@@ -14,11 +24,34 @@ protoc \
     ./proto/*.proto
 
 protoc \
+    -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
     --proto_path=./proto \
     --grpc-gateway_out=logtostderr=true:./go \
     --swagger_out=logtostderr=true:./swagger \
     ./proto/*.proto
+
+
+$GOPATH/bin/protowrap \
+    -I. \
+    -I/usr/local/include \
+    -I$GOPATH/src \
+    --proto_path=. \
+    --grpc-gateway_out=logtostderr=true:$GOPATH/src \
+    --swagger_out=logtostderr=true:$GOPATH/src/github.com/CoveredInsurance/goapi/bridge/swagger \
+    ./**/*.proto
+
+
+protowrap \
+    -I. \
+    -I/usr/local/include \
+    -I$GOPATH/src \
+    -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+    --proto_path=. \
+    --go_out=plugins=grpc:$GOPATH/src \
+    ./**/*.proto
 ```
+
+[Example Go server](https://github.com/improbable-eng/grpc-web/blob/master/example/go/exampleserver/exampleserver.go)
 
 
 #### Typescript compilation
