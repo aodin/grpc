@@ -2,14 +2,15 @@
 // file: things.proto
 
 import * as things_pb from "./things_pb";
+import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
-type ThingsCreate = {
+type ThingsList = {
   readonly methodName: string;
   readonly service: typeof Things;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof things_pb.Thing;
-  readonly responseType: typeof things_pb.Thing;
+  readonly requestType: typeof things_pb.QueryThingsRequest;
+  readonly responseType: typeof things_pb.ThingsResponse;
 };
 
 type ThingsGet = {
@@ -19,6 +20,33 @@ type ThingsGet = {
   readonly responseStream: false;
   readonly requestType: typeof things_pb.GetThingRequest;
   readonly responseType: typeof things_pb.Thing;
+};
+
+type ThingsCreate = {
+  readonly methodName: string;
+  readonly service: typeof Things;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof things_pb.CreateThingRequest;
+  readonly responseType: typeof things_pb.Thing;
+};
+
+type ThingsUpdate = {
+  readonly methodName: string;
+  readonly service: typeof Things;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof things_pb.UpdateThingRequest;
+  readonly responseType: typeof things_pb.ThingsResponse;
+};
+
+type ThingsDelete = {
+  readonly methodName: string;
+  readonly service: typeof Things;
+  readonly requestStream: false;
+  readonly responseStream: false;
+  readonly requestType: typeof things_pb.DeleteThingRequest;
+  readonly responseType: typeof google_protobuf_empty_pb.Empty;
 };
 
 type ThingsQuery = {
@@ -32,7 +60,10 @@ type ThingsQuery = {
 
 export class Things {
   static readonly serviceName: string;
-  static readonly Create: ThingsCreate;
+  static readonly List: ThingsList;
   static readonly Get: ThingsGet;
+  static readonly Create: ThingsCreate;
+  static readonly Update: ThingsUpdate;
+  static readonly Delete: ThingsDelete;
   static readonly Query: ThingsQuery;
 }

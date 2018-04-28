@@ -17,12 +17,13 @@
   "paths": {
     "/v1/things": {
       "get": {
-        "operationId": "Query",
+        "summary": "List any number of things",
+        "operationId": "List",
         "responses": {
           "200": {
-            "description": "(streaming responses)",
+            "description": "",
             "schema": {
-              "$ref": "#/definitions/thingsThing"
+              "$ref": "#/definitions/thingsThingsResponse"
             }
           }
         },
@@ -59,6 +60,7 @@
         ]
       },
       "post": {
+        "summary": "Create and return a new thing",
         "operationId": "Create",
         "responses": {
           "200": {
@@ -85,6 +87,7 @@
     },
     "/v1/things/{id}": {
       "get": {
+        "summary": "Get a single thing",
         "operationId": "Get",
         "responses": {
           "200": {
@@ -106,10 +109,73 @@
         "tags": [
           "Things"
         ]
+      },
+      "delete": {
+        "summary": "Delete a thing",
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/protobufEmpty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "Things"
+        ]
+      }
+    },
+    "/v1/things/{thing.id}": {
+      "patch": {
+        "summary": "Update and return an existing thing",
+        "operationId": "Update",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/thingsThingsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "thing.id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/thingsThing"
+            }
+          }
+        ],
+        "tags": [
+          "Things"
+        ]
       }
     }
   },
   "definitions": {
+    "protobufEmpty": {
+      "type": "object",
+      "description": "service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }\n\nThe JSON representation for `Empty` is empty JSON object `{}`.",
+      "title": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:"
+    },
     "thingsThing": {
       "type": "object",
       "properties": {
@@ -124,7 +190,23 @@
           "type": "string",
           "format": "byte"
         }
-      }
+      },
+      "title": "Thing"
+    },
+    "thingsThingsResponse": {
+      "type": "object",
+      "properties": {
+        "things": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/thingsThing"
+          }
+        },
+        "next": {
+          "type": "string"
+        }
+      },
+      "title": "Things, with an optional \"next\" token"
     }
   }
 }

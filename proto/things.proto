@@ -3,15 +3,13 @@ syntax = "proto3";
 package things;
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 
+// Thing
 message Thing {
   uint64 id      = 1;
   string name    = 2;
   bytes  content = 3;
-}
-
-message GetThingRequest {
-  uint64 id = 1;
 }
 
 message QueryThingsRequest {
@@ -21,23 +19,66 @@ message QueryThingsRequest {
   uint64 offset = 4;
 }
 
+// Things, with an optional "next" token
+message ThingsResponse {
+  repeated Thing things = 1;
+  string         next   = 2;
+}
+
+message GetThingRequest {
+  uint64 id = 1;
+}
+
+message CreateThingRequest {
+  Thing thing = 1;
+}
+
+message UpdateThingRequest {
+  Thing thing = 1;
+}
+
+message DeleteThingRequest {
+  uint64 id = 1;
+}
+
 service Things {
-  rpc Create(Thing) returns (Thing) {
+  // List any number of things
+  rpc List(QueryThingsRequest) returns (ThingsResponse) {
     option (google.api.http) = {
-      post: "/v1/things";
-      body: "*";
+      get: "/v1/things";
     };
   }
 
+  // Get a single thing
   rpc Get(GetThingRequest) returns (Thing) {
     option (google.api.http) = {
       get: "/v1/things/{id}";
     };
   }
 
-  rpc Query(QueryThingsRequest) returns (stream Thing) {
+  // Create and return a new thing
+  rpc Create(CreateThingRequest) returns (Thing) {
     option (google.api.http) = {
-      get: "/v1/things";
+      post: "/v1/things"
+      body: "thing"
     };
   }
+
+  // Update and return an existing thing
+  rpc Update(UpdateThingRequest) returns (ThingsResponse) {
+    option (google.api.http) = {
+      patch: "/v1/things/{thing.id}"
+      body: "thing"
+    };
+  }
+
+  // Delete a thing
+  rpc Delete(DeleteThingRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/things/{id}"
+    };
+  }
+
+  // Query is not exposed to the bridge, but allows streaming of things
+  rpc Query(QueryThingsRequest) returns (stream Thing) {}
 }
