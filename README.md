@@ -10,13 +10,16 @@ Examples for using [protocol buffers](https://developers.google.com/protocol-buf
 5. A Typescript [gRPC web](https://github.com/grpc/grpc-web) client for the CRUD service
 
 
-## Protocol Buffers
+Protocol Buffers
+----
 
 Install the [protobuf compiler, `protoc`](https://github.com/google/protobuf).
 
 [Additional documentation on developers.google.com](https://developers.google.com/protocol-buffers/)
 
-## Go compilation
+
+Go compilation
+----
 
 Install the [Go protoc plugin](https://github.com/golang/protobuf/):
 
@@ -35,8 +38,13 @@ protoc \
 
 It compiled the `*.proto` files in the `/proto` directory and adds the generated Go code to the `/go` directory.
 
+See `server.go` for the example server.
 
-## Swagger
+See `client.go` for an example client.
+
+
+Swagger
+----
 
 Install the [protoc swagger plugin](https://github.com/grpc-ecosystem/grpc-gateway/tree/master/protoc-gen-swagger):
 
@@ -53,7 +61,8 @@ protoc \
     ./proto/*.proto
 ```
 
-## Gateway
+Gateway
+----
 
 ```sh
 go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
@@ -79,7 +88,13 @@ protoc \
     ./proto/*.proto
 ```
 
-[Example Go server](https://github.com/improbable-eng/grpc-web/blob/master/example/go/exampleserver/exampleserver.go)
+See `client.go` for an example client.
+
+
+gRPC Web
+---
+
+See `/grpcweb`.
 
 
 #### Typescript compilation
@@ -95,7 +110,9 @@ protoc \
     proto/*.proto
 ```
 
-## Miscellaneous
+
+Miscellaneous
+----
 
 [Square's protowrap tool](https://github.com/square/goprotowrap) helps when compiling multiple Go protoc packages.
 

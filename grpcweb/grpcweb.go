@@ -7,13 +7,10 @@ import (
 	"os"
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
-	"google.golang.org/grpc/metadata"
 
 	things "github.com/aodin/grpc/go"
+	"github.com/aodin/grpc/server"
 )
 
 var (
@@ -24,39 +21,19 @@ var (
 
 var _ things.Thing
 
-type service struct{}
-
-var _ things.ThingsServer = &service{}
-
-func (s *service) Create(ctx context.Context, thing *things.Thing) (*things.Thing, error) {
-	grpc.SendHeader(ctx, metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-unary"))
-	grpc.SetTrailer(ctx, metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-unary"))
-	grpclog.Println("Create ID:", thing.GetId())
-	return nil, grpc.Errorf(codes.Unimplemented, "Unimplemented")
-}
-
-func (s *service) Get(ctx context.Context, query *things.GetThingRequest) (*things.Thing, error) {
-	grpc.SendHeader(ctx, metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-unary"))
-	grpc.SetTrailer(ctx, metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-unary"))
-	return nil, grpc.Errorf(codes.Unimplemented, "Unimplemented")
-}
-
-func (s *service) Query(query *things.QueryThingsRequest, stream things.Things_QueryServer) error {
-	stream.SendHeader(metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-stream"))
-	stream.SetTrailer(metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-stream"))
-	return nil
-}
-
 func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s %s", r.Method, r.URL.Path)
 }
 
 func main() {
-	grpcServer := grpc.NewServer()
-	things.RegisterThingsServer(grpcServer, &service{})
+	srv, err := server.New()
+	if err != nil {
+		grpclog.Fatalf("failed to create things server: %v", err)
+	}
+
 	grpclog.SetLogger(log.New(os.Stdout, "exampleserver: ", log.LstdFlags))
 
-	wrappedServer := grpcweb.WrapServer(grpcServer)
+	wrappedServer := grpcweb.WrapServer(srv.GrpcSrv)
 	handler := func(resp http.ResponseWriter, req *http.Request) {
 		wrappedServer.ServeHTTP(resp, req)
 	}
@@ -68,7 +45,7 @@ func main() {
 
 	grpclog.Printf("Starting server. http port: %d, with TLS", port)
 
-	if err := httpServer.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath); err != nil {
+	if err = httpServer.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath); err != nil {
 		grpclog.Fatalf("failed starting http2 server: %v", err)
 	}
 

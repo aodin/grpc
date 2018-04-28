@@ -17,11 +17,11 @@ var Addr = ":10808"
 
 type server struct {
 	listener net.Listener
-	grpcSrv  *grpc.Server
+	GrpcSrv  *grpc.Server
 }
 
 func (srv *server) Serve() error {
-	return srv.grpcSrv.Serve(srv.listener)
+	return srv.GrpcSrv.Serve(srv.listener)
 }
 
 // server must implement the Things server interface
@@ -76,7 +76,7 @@ func New() (*server, error) {
 	grpcSrv := grpc.NewServer()
 	srv := &server{
 		listener: listener,
-		grpcSrv:  grpcSrv,
+		GrpcSrv:  grpcSrv,
 	}
 	things.RegisterThingsServer(grpcSrv, srv)
 	return srv, nil

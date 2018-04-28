@@ -8,11 +8,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	things "github.com/aodin/grpcweb/go"
+	things "github.com/aodin/grpc/go"
+	"github.com/aodin/grpc/server"
 )
 
 var (
-	port     = 9090
 	certFile = "./localhost.crt"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		log.Fatalf("TLS creation failed: %v", err)
 	}
 	conn, err := grpc.Dial(
-		fmt.Sprintf("localhost:%d", port),
+		server.Addr,
 		grpc.WithTransportCredentials(creds),
 	)
 	if err != nil {
