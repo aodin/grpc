@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 
 	context "golang.org/x/net/context"
@@ -19,6 +20,7 @@ func main() {
 	defer conn.Close()
 	client := things.NewThingsClient(conn)
 
+	// Create a thing
 	created, err := client.Create(
 		context.Background(),
 		&things.CreateThingRequest{
@@ -30,6 +32,7 @@ func main() {
 	}
 	log.Println(created)
 
+	// Get a thing that does not exist
 	one, err := client.Get(
 		context.Background(),
 		&things.GetThingRequest{
@@ -41,6 +44,7 @@ func main() {
 	}
 	log.Println(one)
 
+	// Get the thing that was created
 	seven, err := client.Get(
 		context.Background(),
 		&things.GetThingRequest{
@@ -51,4 +55,32 @@ func main() {
 		log.Printf("Could not get thing: %v", err)
 	}
 	log.Println(seven)
+
+	// Create another thing
+	if _, err = client.Create(
+		context.Background(),
+		&things.CreateThingRequest{
+			Thing: things.New(10, "Another"),
+		},
+	); err != nil {
+		log.Printf("Could not create thing: %v", err)
+	}
+
+	// Stream the things
+	query := &things.QueryThingsRequest{}
+	stream, err := client.Query(context.Background(), query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		thing, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Query stream failed:", err)
+		}
+		log.Printf("streamed: %+v\n", thing)
+	}
 }

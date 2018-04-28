@@ -111,7 +111,13 @@ func (srv *server) Delete(ctx context.Context, in *things.DeleteThingRequest) (*
 }
 
 func (srv *server) Query(rq *things.QueryThingsRequest, stream things.Things_QueryServer) error {
-	return nil
+	// Return all things in a stream
+	var err error
+	storage.Range(func(key, value interface{}) bool {
+		err = stream.Send(value.(*things.Thing))
+		return err == nil // Range will end if there was an error
+	})
+	return err // Will be nil unless send failed
 }
 
 func New() (*server, error) {
