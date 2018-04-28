@@ -1,13 +1,13 @@
 gRPC Examples
 ====
 
-Examples for using protocol buffers and gRPC. Includes:
+Examples for using [protocol buffers](https://developers.google.com/protocol-buffers/) and [gRPC](https://grpc.io/). Includes:
 
 1. Protocol buffers for an example CRUD service
 2. Go server and client implementations of the CRUD service
 3. Swagger for the CRUD service
-4. A gRPC gateway bridge that registers the CRUD service
-5. A Typescript gRPC client for the CRUD service
+4. A [gRPC gateway](https://github.com/grpc-ecosystem/grpc-gateway) bridge that registers the CRUD service
+5. A Typescript [gRPC web](https://github.com/grpc/grpc-web) client for the CRUD service
 
 
 ## Protocol Buffers
@@ -127,5 +127,6 @@ Add the certificate to chrome using [this guide](https://stackoverflow.com/quest
 
 Or enable Chrome's insecure localhost setting: chrome://flags/#allow-insecure-localhost
 
-Happy hacking,
-aodin 2018
+Happy hacking!
+
+aodin, 2018
