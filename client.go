@@ -22,11 +22,33 @@ func main() {
 	created, err := client.Create(
 		context.Background(),
 		&things.CreateThingRequest{
-			Thing: &things.Thing{Name: "Test"},
+			Thing: things.New(7, "Test"),
 		},
 	)
 	if err != nil {
-		log.Fatalf("Could not create thing: %v", err)
+		log.Printf("Could not create thing: %v", err)
 	}
-	log.Println(created.Id)
+	log.Println(created)
+
+	one, err := client.Get(
+		context.Background(),
+		&things.GetThingRequest{
+			Id: 1,
+		},
+	)
+	if err != nil {
+		log.Printf("Could not get thing: %v", err)
+	}
+	log.Println(one)
+
+	seven, err := client.Get(
+		context.Background(),
+		&things.GetThingRequest{
+			Id: 7,
+		},
+	)
+	if err != nil {
+		log.Printf("Could not get thing: %v", err)
+	}
+	log.Println(seven)
 }
