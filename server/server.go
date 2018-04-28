@@ -3,18 +3,41 @@ package server
 import (
 	"fmt"
 	"net"
+	"os"
+	"path"
 	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
 	things "github.com/aodin/grpc/go"
 )
 
-var Addr = ":10808"
+var (
+	Addr     = "localhost:10808"
+	certFile = "./localhost.crt"
+	keyFile  = "./localhost.key"
+)
+
+func GetCertFile() string {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		gopath = "."
+	}
+	return path.Join(gopath, "src/github.com/aodin/grpc/", certFile)
+}
+
+func GetKeyFile() string {
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		gopath = "."
+	}
+	return path.Join(gopath, "src/github.com/aodin/grpc/", keyFile)
+}
 
 var storage sync.Map
 
@@ -121,13 +144,22 @@ func (srv *server) Query(rq *things.QueryThingsRequest, stream things.Things_Que
 }
 
 func New() (*server, error) {
+	// Create a listener
 	listener, err := net.Listen("tcp", Addr)
 	if err != nil {
 		return nil, fmt.Errorf("Listen failed: %v", err)
 	}
 
-	// FIXME use TLS certs via grpc.Creds and credentials.NewServerTLSFromFile
-	grpcSrv := grpc.NewServer()
+	// Using TLS
+	creds, err := credentials.NewServerTLSFromFile(GetCertFile(), GetKeyFile())
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create TLS credentials: %v", err)
+	}
+	grpcSrv := grpc.NewServer(grpc.Creds(creds))
+
+	// If not using TLS, use NewServer without creds:
+	// grpcSrv := grpc.NewServer()
+
 	srv := &server{
 		listener: listener,
 		GrpcSrv:  grpcSrv,

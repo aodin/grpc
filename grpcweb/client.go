@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"golang.org/x/net/context"
@@ -12,17 +11,13 @@ import (
 	"github.com/aodin/grpc/server"
 )
 
-var (
-	certFile = "./localhost.crt"
-)
-
 func main() {
-	creds, err := credentials.NewClientTLSFromFile(certFile, "")
+	creds, err := credentials.NewClientTLSFromFile(server.GetCertFile(), "")
 	if err != nil {
 		log.Fatalf("TLS creation failed: %v", err)
 	}
 	conn, err := grpc.Dial(
-		server.Addr,
+		"localhost:9090",
 		grpc.WithTransportCredentials(creds),
 	)
 	if err != nil {
@@ -32,9 +27,11 @@ func main() {
 
 	client := things.NewThingsClient(conn)
 
-	msg := things.Thing{Id: 3432}
+	msg := &things.CreateThingRequest{
+		Thing: &things.Thing{Id: 1337, Name: "gRPC web Go client"},
+	}
 
-	resp, err := client.Create(context.Background(), &msg)
+	resp, err := client.Create(context.Background(), msg)
 	if err != nil {
 		log.Fatalf("Echo failed: %v", err)
 	}

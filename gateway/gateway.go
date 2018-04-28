@@ -1,26 +1,40 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	_ "github.com/joho/godotenv/autoload"
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	things "github.com/aodin/grpc/go"
 	"github.com/aodin/grpc/server"
 )
 
-var Addr = ":8080"
+var (
+	Addr = "localhost:8080"
+)
 
 // newGateway returns a new gateway server which translates HTTP into gRPC.
 func newGateway(ctx context.Context, opts ...runtime.ServeMuxOption) (http.Handler, error) {
-	log.Printf("starting gateway server on %s\n", Addr)
 	mux := runtime.NewServeMux(opts...)
-	dialOpts := []grpc.DialOption{grpc.WithInsecure()}
+
+	creds, err := credentials.NewClientTLSFromFile(server.GetCertFile(), "")
+	if err != nil {
+		return mux, fmt.Errorf("TLS creation failed: %v", err)
+	}
+
+	// If using TLS
+	dialOpts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+
+	// If not using TLS
+	// dialOpts := []grpc.DialOption{grpc.WithInsecure()}
 
 	if err := things.RegisterThingsHandlerFromEndpoint(ctx, mux, server.Addr, dialOpts); err != nil {
 		return nil, err
@@ -56,6 +70,20 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func logRequestWrapper(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Wrap the response writer in order to save status code
+		writer := NewLoggingResponseWriter(w)
+		start := time.Now()
+		h.ServeHTTP(writer, r) // The original request is evaluated here
+		elapsed := time.Now().Sub(start).Seconds()
+		log.Printf(
+			"%d %s %s %.6f",
+			writer.statusCode, r.Method, r.URL, elapsed,
+		)
+	})
 }
 
 // headers is allowed CORS headers
@@ -103,9 +131,11 @@ func New(address string, opts ...runtime.ServeMuxOption) error {
 		return err
 	}
 	mux.Handle("/", gw)
+	log.Printf("starting gateway server on %s\n", Addr)
+
 	return http.ListenAndServe(
 		address,
-		handleCORS(mux),
+		logRequestWrapper(handleCORS(mux)),
 	)
 }
 

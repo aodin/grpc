@@ -9,6 +9,8 @@ Examples for using [protocol buffers](https://developers.google.com/protocol-buf
 4. A [gRPC gateway](https://github.com/grpc-ecosystem/grpc-gateway) bridge that registers the CRUD service
 5. A Typescript [gRPC web](https://github.com/grpc/grpc-web) client for the CRUD service
 
+*NOTE* The following commands should be run from the root of the project.
+
 
 Protocol Buffers
 ----
@@ -61,6 +63,8 @@ protoc \
     ./proto/*.proto
 ```
 
+The swagger can be viewed using the [Swagger editor](https://editor.swagger.io/).
+
 Gateway
 ----
 
@@ -107,7 +111,13 @@ protoc \
     --js_out=import_style=commonjs,binary:./js \
     --ts_out=service=true:./js \
     -I ./proto \
-    proto/*.proto
+    proto/*.proto proto/google/**/*.proto
+```
+
+The client bundle is then built with [webpack](https://github.com/webpack/webpack):
+
+```sh
+npx webpack
 ```
 
 
@@ -122,7 +132,7 @@ go get -u github.com/square/goprotowrap/cmd/protowrap
 
 ### More examples
 
-[gRPC Gateway's a bit of everything](https://github.com/grpc-ecosystem/grpc-gateway/blob/master/examples/proto/examplepb/a_bit_of_everything.proto)
+[gRPC Gateway's "a bit of everything" example](https://github.com/grpc-ecosystem/grpc-gateway/blob/master/examples/proto/examplepb/a_bit_of_everything.proto)
 
 ### Auth
 

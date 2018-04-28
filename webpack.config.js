@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   entry: "./grpcweb/client.ts",
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'grpcweb', 'build'),
     filename: 'bundle.js'
   },
   devtool: 'inline-source-map',

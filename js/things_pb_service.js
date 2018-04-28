@@ -43,7 +43,7 @@ Things.Update = {
   requestStream: false,
   responseStream: false,
   requestType: things_pb.UpdateThingRequest,
-  responseType: things_pb.ThingsResponse
+  responseType: things_pb.Thing
 };
 
 Things.Delete = {

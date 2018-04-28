@@ -37,7 +37,7 @@ type ThingsUpdate = {
   readonly requestStream: false;
   readonly responseStream: false;
   readonly requestType: typeof things_pb.UpdateThingRequest;
-  readonly responseType: typeof things_pb.ThingsResponse;
+  readonly responseType: typeof things_pb.Thing;
 };
 
 type ThingsDelete = {

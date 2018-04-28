@@ -6,18 +6,35 @@ import (
 
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	things "github.com/aodin/grpc/go"
 	"github.com/aodin/grpc/server"
 )
 
 func main() {
-	// FIXME use certs
-	conn, err := grpc.Dial(server.Addr, grpc.WithInsecure())
+	// Using TLS:
+	creds, err := credentials.NewClientTLSFromFile(server.GetCertFile(), "")
+	if err != nil {
+		log.Fatalf("TLS creation failed: %v", err)
+	}
+	conn, err := grpc.Dial(
+		server.Addr,
+		grpc.WithTransportCredentials(creds),
+	)
 	if err != nil {
 		log.Fatalf("Dial failed: %v", err)
 	}
 	defer conn.Close()
+
+	// If not using TLS:
+	// conn, err := grpc.Dial(server.Addr, grpc.WithInsecure())
+	// if err != nil {
+	// 	log.Fatalf("Dial failed: %v", err)
+	// }
+	// defer conn.Close()
+
+	// Create the client using the connection of your choice
 	client := things.NewThingsClient(conn)
 
 	// Create a thing

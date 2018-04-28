@@ -1,12 +1,17 @@
 import {grpc} from "grpc-web-client";
 
-import {Things} from "./js/things_pb_service";
-import {Thing} from "./js/things_pb";
+import {Things} from "../js/things_pb_service";
+import {Thing, CreateThingRequest} from "../js/things_pb";
 
 let thing = new Thing();
-thing.setId(45665);
+thing.setId(42);
+thing.setName("gRPC web JS client");
+
+let create = new CreateThingRequest();
+create.setThing(thing);
+
 grpc.unary(Things.Create, {
-  request: thing,
+  request: create,
   host: "https://localhost:9090",
   onEnd: res => {
     const { status, statusMessage, headers, message, trailers } = res;

@@ -14,9 +14,7 @@ import (
 )
 
 var (
-	port            = 9090
-	tlsCertFilePath = "./localhost.crt"
-	tlsKeyFilePath  = "./localhost.key"
+	port = 9090
 )
 
 var _ things.Thing
@@ -33,9 +31,18 @@ func main() {
 
 	grpclog.SetLogger(log.New(os.Stdout, "exampleserver: ", log.LstdFlags))
 
+	static := http.NewServeMux()
+	static.Handle("/", http.FileServer(http.Dir(".")))
+
 	wrappedServer := grpcweb.WrapServer(srv.GrpcSrv)
-	handler := func(resp http.ResponseWriter, req *http.Request) {
-		wrappedServer.ServeHTTP(resp, req)
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		if wrappedServer.IsGrpcWebRequest(r) {
+			grpclog.Println("serving grpc request")
+			wrappedServer.ServeHTTP(w, r)
+		} else {
+			grpclog.Println("serving standard request")
+			static.ServeHTTP(w, r)
+		}
 	}
 
 	httpServer := http.Server{
@@ -43,9 +50,9 @@ func main() {
 		Handler: http.HandlerFunc(handler),
 	}
 
-	grpclog.Printf("Starting server. http port: %d, with TLS", port)
+	grpclog.Printf("Starting server. https port: %d", port)
 
-	if err = httpServer.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath); err != nil {
+	if err = httpServer.ListenAndServeTLS(server.GetCertFile(), server.GetKeyFile()); err != nil {
 		grpclog.Fatalf("failed starting http2 server: %v", err)
 	}
 
