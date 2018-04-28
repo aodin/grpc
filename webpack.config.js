@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-  entry: "./client.ts",
+  entry: "./grpcweb/client.ts",
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js'

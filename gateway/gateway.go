@@ -11,17 +11,18 @@ import (
 	"google.golang.org/grpc"
 
 	things "github.com/aodin/grpc/go"
+	"github.com/aodin/grpc/server"
 )
 
-var bindAddress = ":8080"
+var Addr = ":8080"
 
 // newGateway returns a new gateway server which translates HTTP into gRPC.
 func newGateway(ctx context.Context, opts ...runtime.ServeMuxOption) (http.Handler, error) {
-	log.Printf("starting gateway server on %s\n", bindAddress)
+	log.Printf("starting gateway server on %s\n", Addr)
 	mux := runtime.NewServeMux(opts...)
 	dialOpts := []grpc.DialOption{grpc.WithInsecure()}
 
-	if err := things.RegisterThingsHandlerFromEndpoint(ctx, mux, ":10808", dialOpts); err != nil {
+	if err := things.RegisterThingsHandlerFromEndpoint(ctx, mux, server.Addr, dialOpts); err != nil {
 		return nil, err
 	}
 	return mux, nil
@@ -55,23 +56,6 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
-}
-
-// redirectHTTP will redirect any requests with a value of 'http' in the
-// header 'X-Forwarded-Proto' to HTTPS
-func redirectHTTP(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Forwarded-Proto") == "http" {
-			// Use RequestURI since it is what the client set, unmodified
-			// Other methods, such as URL.String(), reassemble the URL
-			redirectTo := "https://" + r.Host + r.RequestURI
-			http.Redirect(w, r, redirectTo, http.StatusMovedPermanently)
-			return
-		}
-		// Continue the request as usual if there is any other value or no
-		// value at all
-		h.ServeHTTP(w, r)
-	})
 }
 
 // headers is allowed CORS headers
@@ -108,7 +92,7 @@ func preflightHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Run starts a HTTP server and blocks forever if successful.
-func Run(address string, opts ...runtime.ServeMuxOption) error {
+func New(address string, opts ...runtime.ServeMuxOption) error {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -127,7 +111,7 @@ func Run(address string, opts ...runtime.ServeMuxOption) error {
 
 func main() {
 	log.SetFlags(0) // Remove timestamp - it will be set by log ingestion
-	if err := Run(bindAddress); err != nil {
+	if err := New(Addr); err != nil {
 		log.Fatal(err)
 	}
 }

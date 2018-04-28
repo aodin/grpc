@@ -65,7 +65,7 @@ service Things {
   }
 
   // Update and return an existing thing
-  rpc Update(UpdateThingRequest) returns (ThingsResponse) {
+  rpc Update(UpdateThingRequest) returns (Thing) {
     option (google.api.http) = {
       patch: "/v1/things/{thing.id}"
       body: "thing"
